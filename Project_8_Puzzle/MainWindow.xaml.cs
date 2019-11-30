@@ -299,5 +299,60 @@ namespace Project_8_Puzzle
             }
             return true;
         }
+
+        private void GameFrame_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if ( e.ClickCount < 2)
+            {
+                var pos = e.GetPosition(GameFrame);
+                var j = (int)(pos.X) / imageWidth;
+                var i = (int)(pos.Y) / imageHeight;
+                if (i >= 0 && i < 3 && j >= 0 && j < 3)
+                {
+                    if (CheckMovable(i, j))
+                    {
+                        int i_empty = lastPos.Item1;
+                        int j_empty = lastPos.Item2;
+                        if (i == i_empty)
+                        {
+                            if (j - j_empty == 1)
+                            {
+                                game_keyLEFT(i_empty, j_empty);
+                            }
+                            else if (j - j_empty == -1)
+                            {
+                                game_keyRIGHT(i_empty, j_empty);
+                            }
+                        }
+                        else if (j == j_empty)
+                        {
+                            if (i - i_empty == 1)
+                            {
+                                game_keyUP(i_empty, j_empty);
+                            }
+                            else if (i - i_empty == -1)
+                            {
+                                game_keyDOWN(i_empty, j_empty);
+                            }
+                        }
+                        if (CheckWin(listGame))
+                        {
+                            GameFinish();
+                        }
+                    }
+                }
+            }
+
+        }
+
+        private bool CheckMovable(int i, int j)
+        {
+            var lastPos_i = lastPos.Item1;
+            var lastPos_j = lastPos.Item2;
+            var distance = Math.Abs(i - lastPos_i) + Math.Abs(j - lastPos_j);
+            if (distance == 1)
+                return true;
+            return false;
+        }
     }
 }

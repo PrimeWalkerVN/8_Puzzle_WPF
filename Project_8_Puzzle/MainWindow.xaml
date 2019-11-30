@@ -16,6 +16,7 @@
 
         <Border Width="369" Height="369" CornerRadius="5" Canvas.Left="20" Canvas.Top="60" BorderBrush="Black" BorderThickness="2">
             <Canvas Background="White" Margin="2" Name="GameFrame"
+                    MouseLeftButtonDown="GameFrame_MouseLeftButtonDown"
                     />
         </Border>
     </Canvas>
