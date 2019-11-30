@@ -178,5 +178,126 @@ namespace Project_8_Puzzle
                 GameFrame.Children.RemoveAt(0);
             }
         }
+
+        private void SwapImage(Tuple<int, int> src, Tuple<int, int> des)
+        {
+            var temp1 = listGame[src.Item1 * 3 + src.Item2];
+            listGame[src.Item1 * 3 + src.Item2] = listGame[des.Item1 * 3 + des.Item2];
+            listGame[des.Item1 * 3 + des.Item2] = temp1;
+
+            Canvas.SetLeft(images[src.Item1, src.Item2], des.Item2 * (imageWidth));
+            Canvas.SetTop(images[src.Item1, src.Item2], des.Item1 * (imageHeight));
+
+            Canvas.SetLeft(images[des.Item1, des.Item2], src.Item2 * (imageWidth));
+            Canvas.SetTop(images[des.Item1, des.Item2], src.Item1 * (imageHeight));
+
+            var temp2 = images[src.Item1, src.Item2];
+            images[src.Item1, src.Item2] = images[des.Item1, des.Item2];
+            images[des.Item1, des.Item2] = temp2;
+        }
+
+        private void GameFinish()
+        {
+            DrawLast();
+            MessageBox.Show("You WIN!\n");
+        }
+
+        private void DrawLast()
+        {
+            var bitmap = new BitmapImage(new Uri(ImgSource));
+            var cropped = new CroppedBitmap(bitmap, new Int32Rect(2 * ratioImage + paddingLeft, 2 * ratioImage + paddingTop, ratioImage, ratioImage));
+            images[2, 2].Source = cropped;
+        }
+
+        private void Window_OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Down) // The Arrow-Down key
+            {
+                game_keyLEFT(2,2);
+            }
+        }
+
+        private void game_keyLEFT(int i, int j)
+        {
+            if (j + 1 > 2) return;
+            var newPos = new Tuple<int, int>(i, j + 1);
+            SwapImage(new Tuple<int, int>(i, j), newPos);
+            lastPos = newPos;
+            //   Step++;
+            if (CheckWin(listGame))
+            {
+                GameFinish();
+            }
+        }
+
+        private void game_keyRIGHT(int i, int j)
+        {
+            if (j - 1 < 0) return;
+            var newPos = new Tuple<int, int>(i, j - 1);
+            SwapImage(new Tuple<int, int>(i, j), newPos);
+            lastPos = newPos;
+            //Step++;
+            if (CheckWin(listGame))
+            {
+                GameFinish();
+            }
+        }
+        private void game_keyUP(int i, int j)
+        {
+            if (i + 1 > 2) return;
+            var newPos = new Tuple<int, int>(i + 1, j);
+            SwapImage(new Tuple<int, int>(i, j), newPos);
+            lastPos = newPos;
+            //Step++;
+            if (CheckWin(listGame))
+            {
+                GameFinish();
+            }
+        }
+        private void game_keyDOWN(int i, int j)
+        {
+            if (i - 1 < 0) return;
+            var newPos = new Tuple<int, int>(i - 1, j);
+            SwapImage(new Tuple<int, int>(i, j), newPos);
+            lastPos = newPos;
+            //Step++;
+            if (CheckWin(listGame))
+            {
+                GameFinish();
+            }
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Left)
+            {
+                game_keyLEFT(lastPos.Item1, lastPos.Item2);
+            }
+            if (e.Key == Key.Right)
+            {
+                game_keyRIGHT(lastPos.Item1, lastPos.Item2);
+            }
+            if (e.Key == Key.Up)
+            {
+                game_keyUP(lastPos.Item1, lastPos.Item2);
+            }
+            if (e.Key == Key.Down)
+            {
+                game_keyDOWN(lastPos.Item1, lastPos.Item2);
+            }
+        }
+
+
+        private bool CheckWin(List<int> list)
+        {
+            for (int i = 0; i < 9; i++)
+            {
+                if (list[i] != i)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }
