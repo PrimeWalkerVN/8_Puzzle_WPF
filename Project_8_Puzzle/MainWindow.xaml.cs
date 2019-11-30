@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -165,7 +166,7 @@ namespace Project_8_Puzzle
 
             return inv % 2 == 0;
         }
-    
+
         private void StartGame()
         {
             ClearGameFrame();
@@ -213,7 +214,7 @@ namespace Project_8_Puzzle
         {
             if (e.Key == Key.Down) // The Arrow-Down key
             {
-                game_keyLEFT(2,2);
+                game_keyLEFT(2, 2);
             }
         }
 
@@ -299,49 +300,23 @@ namespace Project_8_Puzzle
             }
             return true;
         }
-
+        //drag
+        bool _isDragging = false;
+        Image _selectedBitmap = null;
+        Point _lastPosition;
+        private bool mouseDown = false;
+        private Point mouseDownPos;
         private void GameFrame_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if ( e.ClickCount < 2)
-            {
-                var pos = e.GetPosition(GameFrame);
-                var j = (int)(pos.X) / imageWidth;
-                var i = (int)(pos.Y) / imageHeight;
-                if (i >= 0 && i < 3 && j >= 0 && j < 3)
-                {
-                    if (CheckMovable(i, j))
-                    {
-                        int i_empty = lastPos.Item1;
-                        int j_empty = lastPos.Item2;
-                        if (i == i_empty)
-                        {
-                            if (j - j_empty == 1)
-                            {
-                                game_keyLEFT(i_empty, j_empty);
-                            }
-                            else if (j - j_empty == -1)
-                            {
-                                game_keyRIGHT(i_empty, j_empty);
-                            }
-                        }
-                        else if (j == j_empty)
-                        {
-                            if (i - i_empty == 1)
-                            {
-                                game_keyUP(i_empty, j_empty);
-                            }
-                            else if (i - i_empty == -1)
-                            {
-                                game_keyDOWN(i_empty, j_empty);
-                            }
-                        }
-                        if (CheckWin(listGame))
-                        {
-                            GameFinish();
-                        }
-                    }
-                }
-            }
+            mouseDown = true;
+            mouseDownPos = e.GetPosition(GameFrame);
+
+
+            var position = e.GetPosition(GameFrame);
+            int i = ((int)position.Y) / imageHeight;
+            int j = ((int)position.X) / imageWidth;
+            _selectedBitmap = images[i, j];
+            _lastPosition = e.GetPosition(GameFrame);
 
         }
 
@@ -353,6 +328,137 @@ namespace Project_8_Puzzle
             if (distance == 1)
                 return true;
             return false;
+        }
+
+
+       
+
+        private void GameFrame_MouseMove(object sender, MouseEventArgs e)
+        {
+            var position = e.GetPosition(GameFrame);
+            if ((position.X < 0 || position.X > 360 || position.Y > 360 || position.Y < 0) && mouseDown)
+            {
+                var tempLastPos = mouseDownPos;
+
+                int a = ((int)tempLastPos.Y) / imageHeight;
+                int b = ((int)tempLastPos.X) / imageWidth;
+                Tuple<int, int> temp = new Tuple<int, int>(a, b);
+                SwapImage(temp, temp);
+                _selectedBitmap = null;
+                _isDragging = false;
+                mouseDown = false;
+            }
+            else
+            {
+                if (mouseDown)
+                {
+                    bool check1 = Enumerable.Range((int)position.X - 1, (int)position.X + 1).Contains((int)mouseDownPos.X);
+                    bool check2 = Enumerable.Range((int)position.Y - 1, (int)position.Y + 1).Contains((int)mouseDownPos.Y);
+                    if (!check1 || !check2)
+                    {
+                        _isDragging = true;
+                    }
+                }
+
+                int i = ((int)position.Y) / imageHeight;
+                int j = ((int)position.X) / imageWidth;
+
+                this.Title = $"{position.X} - {position.Y}, a[{i}][{j}]";
+
+                if (_isDragging)
+                {
+                    var dx = position.X - _lastPosition.X;
+                    var dy = position.Y - _lastPosition.Y;
+
+                    var lastLeft = Canvas.GetLeft(_selectedBitmap);
+                    var lastTop = Canvas.GetTop(_selectedBitmap);
+                    Canvas.SetLeft(_selectedBitmap, lastLeft + dx);
+                    Canvas.SetTop(_selectedBitmap, lastTop + dy);
+
+                    _lastPosition = position;
+                }
+            }
+        }
+
+
+        private void GameFrame_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            var positioncheck = e.GetPosition(GameFrame);
+            if ((positioncheck.X < 0 || positioncheck.X > 360 || positioncheck.Y > 360 || positioncheck.Y < 0) && mouseDown)
+            {
+                return;
+            }
+            mouseDown = false;
+            if (_isDragging == false)
+            {
+                if (e.ClickCount < 2)
+                {
+                    var pos = e.GetPosition(GameFrame);
+                    var jpos = (int)(pos.X) / imageWidth;
+                    var ipos = (int)(pos.Y) / imageHeight;
+                    if (ipos >= 0 && ipos < 3 && jpos >= 0 && jpos < 3)
+                    {
+                        if (CheckMovable(ipos, jpos))
+                        {
+                            int i_empty = lastPos.Item1;
+                            int j_empty = lastPos.Item2;
+                            if (ipos == i_empty)
+                            {
+                                if (jpos - j_empty == 1)
+                                {
+                                    game_keyLEFT(i_empty, j_empty);
+                                }
+                                else if (jpos - j_empty == -1)
+                                {
+                                    game_keyRIGHT(i_empty, j_empty);
+                                }
+                            }
+                            else if (jpos == j_empty)
+                            {
+                                if (ipos - i_empty == 1)
+                                {
+                                    game_keyUP(i_empty, j_empty);
+                                }
+                                else if (ipos - i_empty == -1)
+                                {
+                                    game_keyDOWN(i_empty, j_empty);
+                                }
+                            }
+                            if (CheckWin(listGame))
+                            {
+                                GameFinish();
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var position = mouseDownPos;
+
+                int i = ((int)position.Y) / imageHeight;
+                int j = ((int)position.X) / imageWidth;
+
+                this.Title = $"{position.X} - {position.Y}, a[{i}][{j}]";
+
+                //GameFrame.Children.Add(img);
+               // MessageBox.Show(i + "," + j);
+                if(CheckMovable(i, j)) { 
+                    SwapImage(new Tuple<int, int>(i, j), new Tuple<int, int>(lastPos.Item1, lastPos.Item2));
+                    lastPos = new Tuple<int, int>(i, j);
+                    if (CheckWin(listGame))
+                    {
+                        GameFinish();
+                    }
+                }
+                else
+                {
+                    Tuple<int, int> temp = new Tuple<int, int>(i, j);
+                    SwapImage(temp, temp);
+                }
+                _isDragging = false;
+                _selectedBitmap = null;
+            }
         }
     }
 }
