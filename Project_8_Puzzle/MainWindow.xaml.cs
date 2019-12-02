@@ -460,5 +460,25 @@ namespace Project_8_Puzzle
                 _selectedBitmap = null;
             }
         }
+
+        private void ChooseImage_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Load_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Save_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Refresh_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
