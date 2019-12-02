@@ -28,7 +28,6 @@ namespace Project_8_Puzzle
 
         // global variable
         public string ImgSource;
-        private string imgSource;
         private int paddingLeft;
         private int paddingTop;
 
@@ -40,7 +39,10 @@ namespace Project_8_Puzzle
 
         public Image[,] images = new Image[3, 3];
         public List<int> listGame = new List<int>();
-        public Tuple<int, int> lastPos;
+        public Tuple<int, int> whitePos;
+
+        public Tuple<int, int> currentClickPos;
+
 
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -84,7 +86,7 @@ namespace Project_8_Puzzle
 
             ResultImage.Source = new CroppedBitmap(bitmap, rect);
 
-            lastPos = new Tuple<int, int>(2, 2);
+            whitePos = new Tuple<int, int>(2, 2);
             for (int i = 0; i < 9; i++)
             {
                 if (i != 8)
@@ -212,7 +214,7 @@ namespace Project_8_Puzzle
 
         private void Window_OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Down) // The Arrow-Down key
+            if (e.Key == Key.Down) 
             {
                 game_keyLEFT(2, 2);
             }
@@ -223,7 +225,7 @@ namespace Project_8_Puzzle
             if (j + 1 > 2) return;
             var newPos = new Tuple<int, int>(i, j + 1);
             SwapImage(new Tuple<int, int>(i, j), newPos);
-            lastPos = newPos;
+            whitePos = newPos;
             //   Step++;
             if (CheckWin(listGame))
             {
@@ -236,7 +238,7 @@ namespace Project_8_Puzzle
             if (j - 1 < 0) return;
             var newPos = new Tuple<int, int>(i, j - 1);
             SwapImage(new Tuple<int, int>(i, j), newPos);
-            lastPos = newPos;
+            whitePos = newPos;
             //Step++;
             if (CheckWin(listGame))
             {
@@ -248,7 +250,7 @@ namespace Project_8_Puzzle
             if (i + 1 > 2) return;
             var newPos = new Tuple<int, int>(i + 1, j);
             SwapImage(new Tuple<int, int>(i, j), newPos);
-            lastPos = newPos;
+            whitePos = newPos;
             //Step++;
             if (CheckWin(listGame))
             {
@@ -260,7 +262,7 @@ namespace Project_8_Puzzle
             if (i - 1 < 0) return;
             var newPos = new Tuple<int, int>(i - 1, j);
             SwapImage(new Tuple<int, int>(i, j), newPos);
-            lastPos = newPos;
+            whitePos = newPos;
             //Step++;
             if (CheckWin(listGame))
             {
@@ -272,19 +274,19 @@ namespace Project_8_Puzzle
         {
             if (e.Key == Key.Left)
             {
-                game_keyLEFT(lastPos.Item1, lastPos.Item2);
+                game_keyLEFT(whitePos.Item1, whitePos.Item2);
             }
             if (e.Key == Key.Right)
             {
-                game_keyRIGHT(lastPos.Item1, lastPos.Item2);
+                game_keyRIGHT(whitePos.Item1, whitePos.Item2);
             }
             if (e.Key == Key.Up)
             {
-                game_keyUP(lastPos.Item1, lastPos.Item2);
+                game_keyUP(whitePos.Item1, whitePos.Item2);
             }
             if (e.Key == Key.Down)
             {
-                game_keyDOWN(lastPos.Item1, lastPos.Item2);
+                game_keyDOWN(whitePos.Item1, whitePos.Item2);
             }
         }
 
@@ -303,7 +305,7 @@ namespace Project_8_Puzzle
         //drag
         bool _isDragging = false;
         Image _selectedBitmap = null;
-        Point _lastPosition;
+        Point _whitePosition;
         private bool mouseDown = false;
         private Point mouseDownPos;
         private void GameFrame_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -316,15 +318,17 @@ namespace Project_8_Puzzle
             int i = ((int)position.Y) / imageHeight;
             int j = ((int)position.X) / imageWidth;
             _selectedBitmap = images[i, j];
-            _lastPosition = e.GetPosition(GameFrame);
+            _whitePosition = e.GetPosition(GameFrame);
+
+            currentClickPos = new Tuple<int, int>(i, j);
 
         }
 
         private bool CheckMovable(int i, int j)
         {
-            var lastPos_i = lastPos.Item1;
-            var lastPos_j = lastPos.Item2;
-            var distance = Math.Abs(i - lastPos_i) + Math.Abs(j - lastPos_j);
+            var whitePos_i = whitePos.Item1;
+            var whitePos_j = whitePos.Item2;
+            var distance = Math.Abs(i - whitePos_i) + Math.Abs(j - whitePos_j);
             if (distance == 1)
                 return true;
             return false;
@@ -338,10 +342,10 @@ namespace Project_8_Puzzle
             var position = e.GetPosition(GameFrame);
             if ((position.X < 0 || position.X > 360 || position.Y > 360 || position.Y < 0) && mouseDown)
             {
-                var tempLastPos = mouseDownPos;
+                var tempwhitePos = mouseDownPos;
 
-                int a = ((int)tempLastPos.Y) / imageHeight;
-                int b = ((int)tempLastPos.X) / imageWidth;
+                int a = ((int)tempwhitePos.Y) / imageHeight;
+                int b = ((int)tempwhitePos.X) / imageWidth;
                 Tuple<int, int> temp = new Tuple<int, int>(a, b);
                 SwapImage(temp, temp);
                 _selectedBitmap = null;
@@ -352,8 +356,9 @@ namespace Project_8_Puzzle
             {
                 if (mouseDown)
                 {
-                    bool check1 = Enumerable.Range((int)position.X - 1, (int)position.X + 1).Contains((int)mouseDownPos.X);
-                    bool check2 = Enumerable.Range((int)position.Y - 1, (int)position.Y + 1).Contains((int)mouseDownPos.Y);
+                    bool check1 = mouseDownPos.X >= position.X - 2 && mouseDownPos.X <= position.X + 2;
+                    bool check2 = mouseDownPos.Y >= position.Y - 2 && mouseDownPos.Y <= position.Y + 2;
+
                     if (!check1 || !check2)
                     {
                         _isDragging = true;
@@ -367,15 +372,15 @@ namespace Project_8_Puzzle
 
                 if (_isDragging)
                 {
-                    var dx = position.X - _lastPosition.X;
-                    var dy = position.Y - _lastPosition.Y;
+                    var dx = position.X - _whitePosition.X;
+                    var dy = position.Y - _whitePosition.Y;
 
                     var lastLeft = Canvas.GetLeft(_selectedBitmap);
                     var lastTop = Canvas.GetTop(_selectedBitmap);
                     Canvas.SetLeft(_selectedBitmap, lastLeft + dx);
                     Canvas.SetTop(_selectedBitmap, lastTop + dy);
 
-                    _lastPosition = position;
+                    _whitePosition = position;
                 }
             }
         }
@@ -384,81 +389,88 @@ namespace Project_8_Puzzle
         private void GameFrame_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             var positioncheck = e.GetPosition(GameFrame);
-            if ((positioncheck.X < 0 || positioncheck.X > 360 || positioncheck.Y > 360 || positioncheck.Y < 0) && mouseDown)
-            {
-                return;
-            }
+            //if ((positioncheck.X < 0 || positioncheck.X > 360 || positioncheck.Y > 360 || positioncheck.Y < 0) && mouseDown)
+            //{
+            //    return;
+            //}
+
             mouseDown = false;
-            if (_isDragging == false)
-            {
-                if (e.ClickCount < 2)
+                if (_isDragging == false)
                 {
-                    var pos = e.GetPosition(GameFrame);
-                    var jpos = (int)(pos.X) / imageWidth;
-                    var ipos = (int)(pos.Y) / imageHeight;
-                    if (ipos >= 0 && ipos < 3 && jpos >= 0 && jpos < 3)
+                    if (e.ClickCount < 2)
                     {
-                        if (CheckMovable(ipos, jpos))
+                        var pos = e.GetPosition(GameFrame);
+                        var jpos = (int)(pos.X) / imageWidth;
+                        var ipos = (int)(pos.Y) / imageHeight;
+                        if (ipos >= 0 && ipos < 3 && jpos >= 0 && jpos < 3)
                         {
-                            int i_empty = lastPos.Item1;
-                            int j_empty = lastPos.Item2;
-                            if (ipos == i_empty)
+                            if (CheckMovable(ipos, jpos))
                             {
-                                if (jpos - j_empty == 1)
+                                int i_empty = whitePos.Item1;
+                                int j_empty = whitePos.Item2;
+                                if (ipos == i_empty)
                                 {
-                                    game_keyLEFT(i_empty, j_empty);
+                                    if (jpos - j_empty == 1)
+                                    {
+                                        game_keyLEFT(i_empty, j_empty);
+                                    }
+                                    else if (jpos - j_empty == -1)
+                                    {
+                                        game_keyRIGHT(i_empty, j_empty);
+                                    }
                                 }
-                                else if (jpos - j_empty == -1)
+                                else if (jpos == j_empty)
                                 {
-                                    game_keyRIGHT(i_empty, j_empty);
+                                    if (ipos - i_empty == 1)
+                                    {
+                                        game_keyUP(i_empty, j_empty);
+                                    }
+                                    else if (ipos - i_empty == -1)
+                                    {
+                                        game_keyDOWN(i_empty, j_empty);
+                                    }
                                 }
-                            }
-                            else if (jpos == j_empty)
-                            {
-                                if (ipos - i_empty == 1)
+                                if (CheckWin(listGame))
                                 {
-                                    game_keyUP(i_empty, j_empty);
+                                    GameFinish();
                                 }
-                                else if (ipos - i_empty == -1)
-                                {
-                                    game_keyDOWN(i_empty, j_empty);
-                                }
-                            }
-                            if (CheckWin(listGame))
-                            {
-                                GameFinish();
                             }
                         }
                     }
                 }
-            }
-            else
-            {
-                var position = mouseDownPos;
-
-                int i = ((int)position.Y) / imageHeight;
-                int j = ((int)position.X) / imageWidth;
-
-                this.Title = $"{position.X} - {position.Y}, a[{i}][{j}]";
-
-                //GameFrame.Children.Add(img);
-               // MessageBox.Show(i + "," + j);
-                if(CheckMovable(i, j)) { 
-                    SwapImage(new Tuple<int, int>(i, j), new Tuple<int, int>(lastPos.Item1, lastPos.Item2));
-                    lastPos = new Tuple<int, int>(i, j);
-                    if (CheckWin(listGame))
-                    {
-                        GameFinish();
-                    }
-                }
                 else
                 {
-                    Tuple<int, int> temp = new Tuple<int, int>(i, j);
-                    SwapImage(temp, temp);
+
+                    var jcheck = (int)(positioncheck.X) / imageWidth;
+                    var icheck = (int)(positioncheck.Y) / imageHeight;
+                    var check = new Tuple<int, int>(icheck, jcheck);
+                    
+                    var position = mouseDownPos;
+
+                    int i = ((int)position.Y) / imageHeight;
+                    int j = ((int)position.X) / imageWidth;
+
+                    this.Title = $"{position.X} - {position.Y}, a[{i}][{j}]";
+
+                    //GameFrame.Children.Add(img);
+                    // MessageBox.Show(i + "," + j);
+                    if (CheckMovable(i, j) && !currentClickPos.Equals(check) && check.Equals(whitePos))
+                    {
+                        SwapImage(new Tuple<int, int>(i, j), new Tuple<int, int>(whitePos.Item1, whitePos.Item2));
+                        whitePos = new Tuple<int, int>(i, j);
+                        if (CheckWin(listGame))
+                        {
+                            GameFinish();
+                        }
+                    }
+                    else
+                    {
+                        Tuple<int, int> temp = new Tuple<int, int>(i, j);
+                        SwapImage(temp, temp);
+                    }
+                    _isDragging = false;
+                    _selectedBitmap = null;
                 }
-                _isDragging = false;
-                _selectedBitmap = null;
-            }
         }
 
         private void ChooseImage_Click(object sender, RoutedEventArgs e)
