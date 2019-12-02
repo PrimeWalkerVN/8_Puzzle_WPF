@@ -27,3 +27,6 @@ E:\Windows\Project\Project2\new\8_Puzzle_WPF\Project_8_Puzzle\obj\Debug\Project_
 E:\Windows\Project\Project2\new\8_Puzzle_WPF\Project_8_Puzzle\obj\Debug\Project_8_Puzzle.csproj.CoreCompileInputs.cache
 E:\Windows\Project\Project2\new\8_Puzzle_WPF\Project_8_Puzzle\obj\Debug\Project_8_Puzzle.exe
 E:\Windows\Project\Project2\new\8_Puzzle_WPF\Project_8_Puzzle\obj\Debug\Project_8_Puzzle.pdb
+E:\IDE\HKV\C#\WPF\8_Puzzle_WPF\Project_8_Puzzle\bin\Debug\Images\default.png
+E:\IDE\HKV\C#\WPF\8_Puzzle_WPF\Project_8_Puzzle\bin\Debug\Images\default2.jpg
+E:\IDE\HKV\C#\WPF\8_Puzzle_WPF\Project_8_Puzzle\obj\Debug\Project_8_Puzzle_Content.g.cs

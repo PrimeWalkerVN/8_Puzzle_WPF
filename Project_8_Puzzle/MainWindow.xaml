@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Project_8_Puzzle"
         KeyDown="Window_KeyDown"
         mc:Ignorable="d"
-        Title="MainWindow"  Height="480" Width="650" Loaded="Window_Loaded">
+        Title="8_Puzzle"  Height="480" Width="650" Loaded="Window_Loaded">
     <Canvas Background="AliceBlue">
         <ToolBarTray Background="AliceBlue">
             <!--Tools Bar-->
@@ -51,7 +51,17 @@
                 BorderThickness="2" BorderBrush="Gray">
             <Image Name="ResultImage" Width="180" Height="180" HorizontalAlignment="Left" Margin="0,0,0,0"/>
         </Border>
-
+        
+        <Border Canvas.Left="450" Canvas.Top="280" BorderBrush="Violet" BorderThickness="10">
+            <Border.Background>
+                <LinearGradientBrush EndPoint="0.504,1.5" StartPoint="0.504,0.03">
+                    <GradientStop Color="#78f0d8" Offset="0.2"/>
+                    <GradientStop Color="#FFFFFF" Offset="0.567"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <TextBlock Name="Clock" Width="130" Height="50"  
+                       FontSize="35" TextAlignment="Center" Foreground="Red" Text="{Binding TimeZone}"/>
+        </Border>
         <Border Width="369" Height="369" CornerRadius="5" Canvas.Left="20" Canvas.Top="60" BorderBrush="Black" BorderThickness="2">
             <Canvas Background="White" Margin="2" Name="GameFrame"
                     MouseLeftButtonUp="GameFrame_MouseLeftButtonUp"

@@ -1,9 +1,12 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -19,7 +22,7 @@ namespace Project_8_Puzzle
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         public MainWindow()
         {
@@ -35,6 +38,7 @@ namespace Project_8_Puzzle
         public int imageWidth;
         public int imageHeight;
 
+
         private Random rng = new Random();
 
         public Image[,] images = new Image[3, 3];
@@ -43,12 +47,50 @@ namespace Project_8_Puzzle
 
         public Tuple<int, int> currentClickPos;
 
-
+        //============Timer Area====================
+        Timer _timer = new Timer(1000);
+        public int CountTime;
+        public string timerZone = "00:04:00";
+        public string TimeZone
+        {
+            get => timerZone; set
+            {
+                timerZone = value;
+                OnPropertyChanged("TimeZone");
+            }
+        }
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            CountTime--;
+            TimeZone = TimeSpan.FromSeconds(CountTime).ToString();
+            
+            if (CountTime == 0)
+            {
+                _timer.Stop();
+                MessageBox.Show("Time Out! You Lose");
+            }
+        }
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged(string newName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(newName));
+            }
+        }
+        //============ End Timer Area====================
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            ImgSource = AppDomain.CurrentDomain.BaseDirectory + "Images/default.png";
+            //Binding clock 
+            this.DataContext = this;
+            _timer.Elapsed += Timer_Elapsed;
+            CountTime = 240;
+            TimeZone = TimeSpan.FromSeconds(CountTime).ToString();
+            _timer.Enabled = true;
 
+            //Play Game
+            ImgSource = AppDomain.CurrentDomain.BaseDirectory + "Images/default.png";
             StartGame();
             geanerateRandomGame();
             LoadImg(ImgSource);
@@ -202,7 +244,8 @@ namespace Project_8_Puzzle
         private void GameFinish()
         {
             DrawLast();
-            MessageBox.Show("You WIN!\n");
+            MessageBox.Show("You WIN!Refresh Game\n");
+            RefreshGame();
         }
 
         private void DrawLast()
@@ -475,7 +518,20 @@ namespace Project_8_Puzzle
 
         private void ChooseImage_Click(object sender, RoutedEventArgs e)
         {
-
+            OpenFileDialog op = new OpenFileDialog();
+            op.Title = "Select a picture";
+            op.Filter = "All supported graphics|*.jpg;*.jpeg;*.png|" +
+              "JPEG (*.jpg;*.jpeg)|*.jpg;*.jpeg|" +
+              "Portable Network Graphic (*.png)|*.png";
+            if (op.ShowDialog() == true)
+            {
+                ImgSource = op.FileName;
+                StartGame();
+                geanerateRandomGame();
+                LoadImg(ImgSource);
+                MessageBox.Show("Load successful! Let's start\n");
+                return;
+            }
         }
 
         private void Load_Click(object sender, RoutedEventArgs e)
@@ -490,7 +546,16 @@ namespace Project_8_Puzzle
 
         private void Refresh_Click(object sender, RoutedEventArgs e)
         {
-
+            RefreshGame();
+        }
+        private void RefreshGame() {
+            _timer.Stop();
+            StartGame();
+            geanerateRandomGame();
+            LoadImg(ImgSource);
+            CountTime = 240;
+            TimeZone = TimeSpan.FromSeconds(CountTime).ToString();
+            _timer.Start();
         }
     }
 }
