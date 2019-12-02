@@ -7,7 +7,45 @@
         KeyDown="Window_KeyDown"
         mc:Ignorable="d"
         Title="MainWindow"  Height="480" Width="650" Loaded="Window_Loaded">
-    <Canvas>
+    <Canvas Background="AliceBlue">
+        <ToolBarTray Background="AliceBlue">
+            <!--Tools Bar-->
+            <ToolBar Name="ToolsBar">
+                <StackPanel Orientation="Horizontal" Background="AliceBlue">
+                    <Button Name="ChooseImage" Margin="10,0,10,0" Background="AliceBlue" 
+                                Cursor="Hand" Click="ChooseImage_Click" BorderThickness="0">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="20" Height="20" Source="Drawables/folder.png" Margin="0,0,5,0" Stretch="Fill"/>
+                            <TextBlock Text="Choose Image" TextAlignment="Justify" Height="20"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Name="Load" Margin="10,0,10,0" Background="AliceBlue" 
+                                Cursor="Hand" Click="Load_Click"  BorderThickness="0">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="20" Height="20" Source="Drawables/Load.png" Stretch="Fill"/>
+                            <TextBlock Text="Load" TextAlignment="Justify" Height="20"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Name="Save" Margin="10,0,10,0" Background="AliceBlue" 
+                                Cursor="Hand" Click="Save_Click" BorderThickness="0">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="20" Height="20" Source="Drawables/Save.png" Stretch="Fill"/>
+                            <TextBlock Text="Save" TextAlignment="Justify" Height="20"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Name="Refresh" Margin="10,0,10,0" Background="AliceBlue" 
+                                Cursor="Hand" Click="Refresh_Click"  BorderThickness="0">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="20" Height="20" Source="Drawables/refresh.png" Stretch="Fill"/>
+                            <TextBlock Text="Refresh" TextAlignment="Justify" Height="20"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </ToolBar>
+        </ToolBarTray>
 
         <Border Width="180" Height="180" CornerRadius="5" Canvas.Top="70" Canvas.Left = "430"
                 BorderThickness="2" BorderBrush="Gray">
