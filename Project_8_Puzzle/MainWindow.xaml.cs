@@ -518,6 +518,7 @@ namespace Project_8_Puzzle
 
         private void ChooseImage_Click(object sender, RoutedEventArgs e)
         {
+            
             OpenFileDialog op = new OpenFileDialog();
             op.Title = "Select a picture";
             op.Filter = "All supported graphics|*.jpg;*.jpeg;*.png|" +
@@ -530,8 +531,11 @@ namespace Project_8_Puzzle
                 geanerateRandomGame();
                 LoadImg(ImgSource);
                 MessageBox.Show("Load successful! Let's start\n");
+                CountTime = 240;
+                TimeZone = TimeSpan.FromSeconds(CountTime).ToString();
                 return;
             }
+            
         }
 
         private void Load_Click(object sender, RoutedEventArgs e)
