@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +17,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace Project_8_Puzzle
 {
@@ -93,10 +96,11 @@ namespace Project_8_Puzzle
             ImgSource = AppDomain.CurrentDomain.BaseDirectory + "Images/default.png";
             StartGame();
             geanerateRandomGame();
-            LoadImg(ImgSource);
+            whitePos = new Tuple<int, int>(2, 2);
+            LoadImg(ImgSource,whitePos);
         }
 
-        private void LoadImg(string imgSource)
+        private void LoadImg(string imgSource, Tuple<int, int> whitePos)
         {
             var bitmap = new BitmapImage(new Uri(imgSource));
             var pixelWidth = bitmap.PixelWidth / 3;
@@ -128,10 +132,18 @@ namespace Project_8_Puzzle
 
             ResultImage.Source = new CroppedBitmap(bitmap, rect);
 
-            whitePos = new Tuple<int, int>(2, 2);
+            var whitePosition = 8;
+            if (whitePos.Item1 == 0)
+                whitePosition = whitePos.Item2;
+            if (whitePos.Item1 == 1)
+                whitePosition = whitePos.Item2 + 3;
+            if (whitePos.Item1 == 2)
+                whitePosition = whitePos.Item2 + 6;
+
+
             for (int i = 0; i < 9; i++)
             {
-                if (i != 8)
+                if (i != whitePosition)
                 {
                     var index = listGame[i];
                     var index_i = index / 3;
@@ -153,7 +165,7 @@ namespace Project_8_Puzzle
 
                     images[i / 3, i % 3] = imageView;
                 }
-                if (i == 8)
+                if (i == whitePosition)
                 {
                     int axisX = 2 * ratioImage;
                     int axisY = 2 * ratioImage;
@@ -244,7 +256,7 @@ namespace Project_8_Puzzle
         private void GameFinish()
         {
             DrawLast();
-            MessageBox.Show("You WIN!Refresh Game\n");
+            MessageBox.Show("You WIN! Refresh Game.....\n");
             RefreshGame();
         }
 
@@ -529,7 +541,8 @@ namespace Project_8_Puzzle
                 ImgSource = op.FileName;
                 StartGame();
                 geanerateRandomGame();
-                LoadImg(ImgSource);
+                whitePos = new Tuple<int, int>(2, 2);
+                LoadImg(ImgSource,whitePos);
                 MessageBox.Show("Load successful! Let's start\n");
                 CountTime = 240;
                 TimeZone = TimeSpan.FromSeconds(CountTime).ToString();
@@ -540,12 +553,103 @@ namespace Project_8_Puzzle
 
         private void Load_Click(object sender, RoutedEventArgs e)
         {
+            _timer.Stop();
+            OpenFileDialog open = new OpenFileDialog();
+            open.Filter = "xml files (*.xml)|*.xml|All files (*.*)|*.*";
+            open.Title = "Select Game saved";
+            if (open.ShowDialog() == true)
+            {
+                var doc = new XmlDocument();
+                doc.Load(open.FileName);
 
+                var root = doc.DocumentElement;
+
+                var img = root.ChildNodes[1];
+                ImgSource = img.Attributes["Source"].Value;
+                if (!File.Exists(ImgSource))
+                {
+                    MessageBox.Show("Not exists image, check again!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _timer.Start();
+                    return;
+                }
+                ratioImage = int.Parse(img.Attributes["Ratio"].Value);
+                imageWidth = int.Parse(img.Attributes["Width"].Value);
+                imageHeight = int.Parse(img.Attributes["Height"].Value);
+                paddingLeft = int.Parse(img.Attributes["PaddingLeft"].Value);
+                paddingTop = int.Parse(img.Attributes["PaddingTop"].Value);
+
+                var time_counter = root.FirstChild.ChildNodes[0];
+
+                CountTime = int.Parse(time_counter.Attributes["CountTime"].Value);
+
+                var state = root.ChildNodes[2];
+                var empty = state.Attributes["WhitePos"].Value;
+                var tokens = empty.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                whitePos = new Tuple<int, int>(int.Parse(tokens[0]), int.Parse(tokens[1]));
+                for (int i = 0; i < 3; i++)
+                {
+                    var line = state.ChildNodes[i].Attributes["Value"].Value;
+                    tokens = line.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                    listGame[i * 3] = int.Parse(tokens[0]);
+                    listGame[i * 3 + 1] = int.Parse(tokens[1]);
+                    listGame[i * 3 + 2] = int.Parse(tokens[2]);
+                }
+                ClearGameFrame();
+                LoadImg(ImgSource,whitePos);
+                TimeZone = TimeSpan.FromSeconds(CountTime).ToString();
+                _timer.Start();
+
+                if (CheckWin(listGame))
+                {
+                    GameFinish();
+                }
+            }
+            else _timer.Start();
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
+            _timer.Stop();
+            SaveFileDialog save = new SaveFileDialog();
+            save.Filter = "xml files (*.xml)|*.xml|All files (*.*)|*.*";
+            if (save.ShowDialog() == true)
+            {
+                XmlDocument doc = new XmlDocument();
+                var root = doc.CreateElement("Game");
 
+                var counter = doc.CreateElement("Counter");
+
+                var time_counter = doc.CreateElement("TimeZone");
+                time_counter.SetAttribute("CountTime", CountTime.ToString());
+
+                counter.AppendChild(time_counter);
+                root.AppendChild(counter);
+
+                var img = doc.CreateElement("Image");
+                img.SetAttribute("Source", ImgSource.ToString());
+                img.SetAttribute("Ratio", ratioImage.ToString());
+                img.SetAttribute("Width", imageWidth.ToString());
+                img.SetAttribute("Height", imageHeight.ToString());
+                img.SetAttribute("PaddingLeft", paddingLeft.ToString());
+                img.SetAttribute("PaddingTop", paddingTop.ToString());
+                root.AppendChild(img);
+
+                var state = doc.CreateElement("State");
+                state.SetAttribute("WhitePos", $"{whitePos.Item1} {whitePos.Item2}");
+                for (int i = 0; i < 3; i++)
+                {
+                    var line = doc.CreateElement("Line");
+                    line.SetAttribute("Value", $"{listGame[i * 3]} {listGame[i * 3 + 1]} {listGame[i * 3 + 2]}");
+                    state.AppendChild(line);
+                }
+                root.AppendChild(state);
+
+                doc.AppendChild(root);
+                doc.Save(save.FileName);
+                MessageBox.Show("Saved game!");
+            }
+            else MessageBox.Show("Error....Can not save!");
+          _timer.Start();
         }
 
         private void Refresh_Click(object sender, RoutedEventArgs e)
@@ -556,7 +660,8 @@ namespace Project_8_Puzzle
             _timer.Stop();
             StartGame();
             geanerateRandomGame();
-            LoadImg(ImgSource);
+            whitePos = new Tuple<int, int>(2, 2);
+            LoadImg(ImgSource,whitePos);
             CountTime = 240;
             TimeZone = TimeSpan.FromSeconds(CountTime).ToString();
             _timer.Start();
