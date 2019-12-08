@@ -128,7 +128,7 @@ namespace Project_8_Puzzle
                 rect.Width = bitmap.PixelWidth - 2 * paddingLeft;
             }
             imageWidth = 120;
-            imageHeight = 120;// (pixelHeight * imageWidth / pixelWidth);
+            imageHeight = 120;
 
             ResultImage.Source = new CroppedBitmap(bitmap, rect);
 
@@ -277,11 +277,13 @@ namespace Project_8_Puzzle
 
         private void game_keyLEFT(int i, int j)
         {
-            if (j + 1 > 2) return;
+            if (j + 1 > 2)
+                return;
+
             var newPos = new Tuple<int, int>(i, j + 1);
             SwapImage(new Tuple<int, int>(i, j), newPos);
             whitePos = newPos;
-            //   Step++;
+
             if (CheckWin(listGame))
             {
                 GameFinish();
@@ -290,11 +292,13 @@ namespace Project_8_Puzzle
 
         private void game_keyRIGHT(int i, int j)
         {
-            if (j - 1 < 0) return;
+            if (j - 1 < 0)
+                return;
+
             var newPos = new Tuple<int, int>(i, j - 1);
             SwapImage(new Tuple<int, int>(i, j), newPos);
             whitePos = newPos;
-            //Step++;
+
             if (CheckWin(listGame))
             {
                 GameFinish();
@@ -302,11 +306,13 @@ namespace Project_8_Puzzle
         }
         private void game_keyUP(int i, int j)
         {
-            if (i + 1 > 2) return;
+            if (i + 1 > 2)
+                return;
+
             var newPos = new Tuple<int, int>(i + 1, j);
             SwapImage(new Tuple<int, int>(i, j), newPos);
             whitePos = newPos;
-            //Step++;
+             
             if (CheckWin(listGame))
             {
                 GameFinish();
@@ -314,11 +320,13 @@ namespace Project_8_Puzzle
         }
         private void game_keyDOWN(int i, int j)
         {
-            if (i - 1 < 0) return;
+            if (i - 1 < 0)
+                return;
+
             var newPos = new Tuple<int, int>(i - 1, j);
             SwapImage(new Tuple<int, int>(i, j), newPos);
             whitePos = newPos;
-            //Step++;
+             
             if (CheckWin(listGame))
             {
                 GameFinish();
@@ -357,7 +365,8 @@ namespace Project_8_Puzzle
             }
             return true;
         }
-        //drag
+
+        //drag variable
         bool _isDragging = false;
         Image _selectedBitmap = null;
         Point _whitePosition;
@@ -367,7 +376,6 @@ namespace Project_8_Puzzle
         {
             mouseDown = true;
             mouseDownPos = e.GetPosition(GameFrame);
-
 
             var position = e.GetPosition(GameFrame);
             int i = ((int)position.Y) / imageHeight;
@@ -423,8 +431,6 @@ namespace Project_8_Puzzle
                 int i = ((int)position.Y) / imageHeight;
                 int j = ((int)position.X) / imageWidth;
 
-                this.Title = $"{position.X} - {position.Y}, a[{i}][{j}]";
-
                 if (_isDragging)
                 {
                     var dx = position.X - _whitePosition.X;
@@ -444,12 +450,8 @@ namespace Project_8_Puzzle
         private void GameFrame_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             var positioncheck = e.GetPosition(GameFrame);
-            //if ((positioncheck.X < 0 || positioncheck.X > 360 || positioncheck.Y > 360 || positioncheck.Y < 0) && mouseDown)
-            //{
-            //    return;
-            //}
-
             mouseDown = false;
+
                 if (_isDragging == false)
                 {
                     if (e.ClickCount < 2)
@@ -505,10 +507,6 @@ namespace Project_8_Puzzle
                     int i = ((int)position.Y) / imageHeight;
                     int j = ((int)position.X) / imageWidth;
 
-                    this.Title = $"{position.X} - {position.Y}, a[{i}][{j}]";
-
-                    //GameFrame.Children.Add(img);
-                    // MessageBox.Show(i + "," + j);
                     if (CheckMovable(i, j) && !currentClickPos.Equals(check) && check.Equals(whitePos))
                     {
                         SwapImage(new Tuple<int, int>(i, j), new Tuple<int, int>(whitePos.Item1, whitePos.Item2));
@@ -536,6 +534,7 @@ namespace Project_8_Puzzle
             op.Filter = "All supported graphics|*.jpg;*.jpeg;*.png|" +
               "JPEG (*.jpg;*.jpeg)|*.jpg;*.jpeg|" +
               "Portable Network Graphic (*.png)|*.png";
+
             if (op.ShowDialog() == true)
             {
                 ImgSource = op.FileName;
@@ -557,6 +556,7 @@ namespace Project_8_Puzzle
             OpenFileDialog open = new OpenFileDialog();
             open.Filter = "xml files (*.xml)|*.xml|All files (*.*)|*.*";
             open.Title = "Select Game saved";
+
             if (open.ShowDialog() == true)
             {
                 var doc = new XmlDocument();
@@ -612,6 +612,7 @@ namespace Project_8_Puzzle
             _timer.Stop();
             SaveFileDialog save = new SaveFileDialog();
             save.Filter = "xml files (*.xml)|*.xml|All files (*.*)|*.*";
+
             if (save.ShowDialog() == true)
             {
                 XmlDocument doc = new XmlDocument();
@@ -636,6 +637,7 @@ namespace Project_8_Puzzle
 
                 var state = doc.CreateElement("State");
                 state.SetAttribute("WhitePos", $"{whitePos.Item1} {whitePos.Item2}");
+
                 for (int i = 0; i < 3; i++)
                 {
                     var line = doc.CreateElement("Line");
