@@ -96,7 +96,7 @@ namespace Project_8_Puzzle
             _timer.Enabled = true;
 
             //Play Game
-            ImgSource = AppDomain.CurrentDomain.BaseDirectory + "Images/default.png";
+            ImgSource = AppDomain.CurrentDomain.BaseDirectory + "Images/default2.png";
             StartGame();
             geanerateRandomGame();
             whitePos = new Tuple<int, int>(2, 2);
