@@ -50,10 +50,12 @@ namespace Project_8_Puzzle
 
         public Tuple<int, int> currentClickPos;
 
+        private bool finishButLose = false;
+
         //============Timer Area====================
         Timer _timer = new Timer(1000);
         public int CountTime;
-        public string timerZone = "00:04:00";
+        public string timerZone = "00:03:00";
         public string TimeZone
         {
             get => timerZone; set
@@ -70,7 +72,8 @@ namespace Project_8_Puzzle
             if (CountTime == 0)
             {
                 _timer.Stop();
-                MessageBox.Show("Time Out! You Lose");
+                MessageBox.Show("Time Out! You Lose! You can try to finish it...");
+                finishButLose = true;
             }
         }
         public event PropertyChangedEventHandler PropertyChanged;
@@ -88,7 +91,7 @@ namespace Project_8_Puzzle
             //Binding clock 
             this.DataContext = this;
             _timer.Elapsed += Timer_Elapsed;
-            CountTime = 240;
+            CountTime = 180;
             TimeZone = TimeSpan.FromSeconds(CountTime).ToString();
             _timer.Enabled = true;
 
@@ -256,8 +259,17 @@ namespace Project_8_Puzzle
         private void GameFinish()
         {
             DrawLast();
-            MessageBox.Show("You WIN! Refresh Game.....\n");
-            RefreshGame();
+            if (finishButLose)
+            {
+                MessageBox.Show("Game finish but you lose!!! Try again ...\n");
+                RefreshGame();
+            }
+            else
+            {
+                _timer.Stop();
+                MessageBox.Show("You WIN! Refresh Game.....\n");
+                RefreshGame();
+            }
         }
 
         private void DrawLast()
@@ -528,7 +540,7 @@ namespace Project_8_Puzzle
 
         private void ChooseImage_Click(object sender, RoutedEventArgs e)
         {
-            
+            _timer.Stop();
             OpenFileDialog op = new OpenFileDialog();
             op.Title = "Select a picture";
             op.Filter = "All supported graphics|*.jpg;*.jpeg;*.png|" +
@@ -543,9 +555,14 @@ namespace Project_8_Puzzle
                 whitePos = new Tuple<int, int>(2, 2);
                 LoadImg(ImgSource,whitePos);
                 MessageBox.Show("Load successful! Let's start\n");
-                CountTime = 240;
+                CountTime = 180;
                 TimeZone = TimeSpan.FromSeconds(CountTime).ToString();
+                _timer.Start();
                 return;
+            }
+            else
+            {
+                _timer.Start();
             }
             
         }
@@ -664,7 +681,7 @@ namespace Project_8_Puzzle
             geanerateRandomGame();
             whitePos = new Tuple<int, int>(2, 2);
             LoadImg(ImgSource,whitePos);
-            CountTime = 240;
+            CountTime = 180;
             TimeZone = TimeSpan.FromSeconds(CountTime).ToString();
             _timer.Start();
         }
